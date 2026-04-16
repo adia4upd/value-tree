@@ -618,8 +618,33 @@
     }).open();
   }
 
-  // 영문 상세주소 입력 시 필수 검사용 hidden 필드 업데이트 (없으면 무시)
-  document.getElementById('address2En').addEventListener('input', function() {});
+  // 한국어 상세 주소 → 영문 자동 변환
+  function translateDetailToEn(korean) {
+    if (!korean) return '';
+    let en = korean.trim();
+
+    // 숫자+단위 패턴 변환
+    en = en.replace(/(\d+)\s*동/g, '$1-dong');
+    en = en.replace(/(\d+)\s*호/g, 'Unit $1');
+    en = en.replace(/지하\s*(\d+)\s*층/g, 'B$1F');
+    en = en.replace(/(\d+)\s*층/g, '$1F');
+    en = en.replace(/(\d+)\s*번지/g, '$1');
+
+    // 남은 한글 단어 처리
+    en = en.replace(/아파트|APT/gi, 'Apt.');
+    en = en.replace(/빌라/g, 'Villa');
+    en = en.replace(/오피스텔/g, 'Officetel');
+
+    return en;
+  }
+
+  // 한국어 상세 주소 입력 시 영문 자동 변환
+  document.getElementById('address2').addEventListener('input', function() {
+    const base = document.getElementById('address1En').value.trim();
+    if (!base) return; // 우편번호 검색 전엔 동작 안 함
+    const enDetail = translateDetailToEn(this.value);
+    document.getElementById('address2En').value = enDetail;
+  });
 
   // ✅ 구글 앱스 스크립트 웹앱 URL을 여기에 붙여넣으세요
   const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_lffSAv_1Yq9BGc07pVx2W5SbUybl9p1Vzk56-OUUqkdRpHPxQOwo3to6HYQdZB0E/exec';
