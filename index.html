@@ -638,12 +638,26 @@
     return en;
   }
 
-  // 한국어 상세 주소 입력 시 영문 자동 변환
+  // 한국어 상세 주소 입력 시 영문 자동 변환 + 미리보기 업데이트
   document.getElementById('address2').addEventListener('input', function() {
     const base = document.getElementById('address1En').value.trim();
     if (!base) return; // 우편번호 검색 전엔 동작 안 함
     const enDetail = translateDetailToEn(this.value);
     document.getElementById('address2En').value = enDetail;
+    // 미리보기: 상세주소 앞, 기본주소 뒤 (국제 배송 표준)
+    document.getElementById('address2En').dispatchEvent(new Event('input'));
+  });
+
+  // 영문 상세주소 변경 시 미리보기 갱신
+  document.getElementById('address2En').addEventListener('input', function() {
+    const base = document.getElementById('address1En').value.trim();
+    const detail = this.value.trim();
+    const preview = detail ? detail + ', ' + base : base;
+    const note = document.getElementById('enAddressSection').querySelector('input[readonly]');
+    // 미리보기용 placeholder 업데이트
+    if (base) {
+      document.getElementById('address1En').setAttribute('placeholder', preview);
+    }
   });
 
   // ✅ 구글 앱스 스크립트 웹앱 URL을 여기에 붙여넣으세요
@@ -655,7 +669,8 @@
 
     const enBase = document.getElementById('address1En').value.trim();
     const enDetail = document.getElementById('address2En').value.trim();
-    const fullEnAddress = enDetail ? enBase + ', ' + enDetail : enBase;
+    // 국제 배송 표준: 상세주소(Unit/Apt) → 기본주소 순서
+    const fullEnAddress = enDetail ? enDetail + ', ' + enBase : enBase;
 
     const fields = {
       '가입 ID': document.getElementById('userId').value.trim(),
