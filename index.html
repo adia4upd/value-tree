@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Value Tree — 회원 주문 신청서</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Noto+Serif+KR:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #f7f3ec;
+      --bark: #3b2a1a;
+      --moss: #4a6741;
+      --leaf: #6d9b5f;
+      --gold: #c8a96e;
+      --fog: #e8e0d4;
+      --ink: #2c1f0f;
+      --mist: rgba(255,255,255,0.6);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--cream);
+      color: var(--ink);
+      font-family: 'Noto Serif KR', serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Background texture pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(106,155,95,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(200,169,110,0.10) 0%, transparent 55%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a6741' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Decorative leaves */
+    .leaf-deco {
+      position: fixed;
+      opacity: 0.06;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .leaf-deco.top-left {
+      top: -60px; left: -40px;
+      width: 320px;
+    }
+    .leaf-deco.bottom-right {
+      bottom: -60px; right: -40px;
+      width: 280px;
+      transform: rotate(180deg);
+    }
+
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 660px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 10px;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .tree-icon {
+      width: 44px;
+      height: 44px;
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--moss);
+      letter-spacing: 0.04em;
+    }
+
+    .brand-name span {
+      color: var(--gold);
+    }
+
+    .header-divider {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 0 auto 14px;
+    }
+
+    .header-subtitle {
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--moss);
+      font-weight: 300;
+      margin-bottom: 6px;
+    }
+
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--bark);
+      font-weight: 400;
+    }
+
+    /* Card */
+    .card {
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(200,169,110,0.25);
+      border-radius: 16px;
+      padding: 44px 48px;
+      box-shadow:
+        0 2px 0 rgba(200,169,110,0.15),
+        0 8px 40px rgba(59,42,26,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+      animation: fadeUp 0.7s ease 0.1s both;
+      margin-top: 28px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--fog), transparent);
+    }
+
+    .field-grid {
+      display: grid;
+      gap: 22px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    label {
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--bark);
+    }
+
+    label .required {
+      color: var(--leaf);
+      margin-left: 3px;
+    }
+
+    label .hint {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      text-transform: none;
+      color: #9a8872;
+      margin-left: 6px;
+    }
+
+    input, select {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: rgba(247,243,236,0.7);
+      border: 1.5px solid var(--fog);
+      border-radius: 8px;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      width: 100%;
+    }
+
+    input::placeholder {
+      color: #c8b9a4;
+      font-weight: 300;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--leaf);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(109,155,95,0.12);
+    }
+
+    input:focus::placeholder {
+      color: #d8cfc4;
+    }
+
+    /* Address fields */
+    .address-block {
+      display: grid;
+      gap: 10px;
+    }
+
+    .address-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 10px;
+    }
+
+    .zip-btn {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--moss);
+      background: rgba(74,103,65,0.08);
+      border: 1.5px solid rgba(74,103,65,0.25);
+      border-radius: 7px;
+      padding: 0 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      height: 44px;
+    }
+
+    .zip-btn:hover {
+      background: var(--moss);
+      color: #fff;
+      border-color: var(--moss);
+    }
+
+    /* Overseas info box */
+    .info-box {
+      background: rgba(74,103,65,0.05);
+      border: 1px solid rgba(74,103,65,0.15);
+      border-left: 3px solid var(--leaf);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-top: 4px;
+    }
+
+    .info-box svg { flex-shrink: 0; margin-top: 1px; }
+
+    .info-box p {
+      font-size: 12px;
+      color: var(--moss);
+      line-height: 1.7;
+      font-weight: 400;
+    }
+
+    .info-box strong {
+      font-weight: 600;
+    }
+
+    /* Divider */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--fog), transparent);
+      margin: 28px 0;
+    }
+
+    /* Agreement */
+    .agreement {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .agreement input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      min-width: 17px;
+      margin-top: 2px;
+      accent-color: var(--moss);
+      cursor: pointer;
+    }
+
+    .agreement-text {
+      font-size: 12.5px;
+      color: #7a6a58;
+      line-height: 1.7;
+    }
+
+    .agreement-text a {
+      color: var(--moss);
+      text-decoration: underline;
+      text-decoration-color: rgba(74,103,65,0.4);
+      text-underline-offset: 2px;
+    }
+
+    /* Submit */
+    .submit-btn {
+      width: 100%;
+      margin-top: 28px;
+      padding: 15px;
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      letter-spacing: 0.08em;
+      color: #fff;
+      background: linear-gradient(135deg, var(--moss) 0%, #3a5633 100%);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(74,103,65,0.3), 0 1px 0 rgba(255,255,255,0.15) inset;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      transition: left 0.4s;
+    }
+
+    .submit-btn:hover::before { left: 100%; }
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 7px 22px rgba(74,103,65,0.35), 0 1px 0 rgba(255,255,255,0.15) inset;
+    }
+    .submit-btn:active { transform: translateY(0); }
+
+    /* Footer */
+    .footer-note {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 11.5px;
+      color: #a0917e;
+      line-height: 1.8;
+      animation: fadeUp 0.7s ease 0.3s both;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Print styles */
+    @media print {
+      body { background: white; padding: 0; }
+      body::before, .leaf-deco { display: none; }
+      .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        backdrop-filter: none;
+        background: white;
+      }
+      .submit-btn, .zip-btn { display: none; }
+    }
+
+    @media (max-width: 580px) {
+      .card { padding: 30px 22px; }
+      .field-row { grid-template-columns: 1fr; }
+      .address-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Decorative SVG leaves -->
+<svg class="leaf-deco top-left" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M40 280 C 80 160, 200 80, 300 20 C 220 100, 160 200, 40 280Z" fill="#3b2a1a"/>
+  <path d="M60 260 C 100 160, 200 100, 280 40 C 210 120, 150 210, 60 260Z" fill="#4a6741"/>
+</svg>
+<svg class="leaf-deco bottom-right" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M40 280 C 80 160, 200 80, 260 20 C 200 100, 140 190, 40 280Z" fill="#4a6741"/>
+  <path d="M20 260 C 70 160, 190 90, 260 30 C 190 120, 120 200, 20 260Z" fill="#c8a96e"/>
+</svg>
+
+<div class="page-wrap">
+  <!-- Header -->
+  <div class="header">
+    <div class="brand-mark">
+      <!-- Tree SVG Icon -->
+      <svg class="tree-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="22" cy="16" rx="13" ry="12" fill="#4a6741" opacity="0.9"/>
+        <ellipse cx="15" cy="20" rx="9" ry="8" fill="#6d9b5f" opacity="0.8"/>
+        <ellipse cx="29" cy="21" rx="9" ry="7.5" fill="#4a6741" opacity="0.7"/>
+        <rect x="20" y="28" width="4" height="12" rx="2" fill="#3b2a1a"/>
+        <ellipse cx="22" cy="14" rx="8" ry="7" fill="#6d9b5f" opacity="0.6"/>
+      </svg>
+      <div class="brand-name"><span>Value</span> Tree</div>
+    </div>
+    <div class="header-divider"></div>
+    <p class="header-subtitle">해외 직구 서비스</p>
+    <h1 class="header-title">회원 주문 신청서</h1>
+  </div>
+
+  <!-- Form Card -->
+  <div class="card">
+    <form id="applicationForm" onsubmit="handleSubmit(event)" novalidate>
+
+      <!-- 계정 정보 -->
+      <div class="section-label">계정 정보</div>
+
+      <div class="field-grid">
+        <div class="field-row">
+          <div class="field">
+            <label>가입 ID <span class="required">*</span></label>
+            <input type="text" id="userId" name="userId"
+              placeholder="영문 + 숫자, 6~20자"
+              maxlength="20"
+              pattern="[a-zA-Z0-9]{6,20}"
+              required />
+          </div>
+          <div class="field">
+            <label>통관 번호 <span class="required">*</span><span class="hint">개인 통관 고유 부호</span></label>
+            <input type="text" id="customsCode" name="customsCode"
+              placeholder="P000000000000"
+              maxlength="13"
+              required />
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top: 18px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8" cy="8" r="7.5" stroke="#6d9b5f" stroke-width="1"/>
+          <path d="M8 7v5" stroke="#6d9b5f" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="8" cy="4.5" r="0.75" fill="#6d9b5f"/>
+        </svg>
+        <p>통관 번호는 <strong>관세청 유니패스(unipass.customs.go.kr)</strong>에서 발급받을 수 있습니다. 해외 직구 시 개인 통관에 반드시 필요합니다.</p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- 개인 정보 -->
+      <div class="section-label">개인 정보</div>
+
+      <div class="field-grid">
+        <div class="field-row">
+          <div class="field">
+            <label>이름 <span class="required">*</span></label>
+            <input type="text" id="name" name="name"
+              placeholder="실명 입력"
+              required />
+          </div>
+          <div class="field">
+            <label>전화번호 <span class="required">*</span></label>
+            <input type="tel" id="phone" name="phone"
+              placeholder="010-0000-0000"
+              maxlength="13"
+              required />
+          </div>
+        </div>
+
+        <!-- 주소 -->
+        <div class="field">
+          <label>주소 <span class="required">*</span></label>
+          <div class="address-block">
+            <div class="address-row">
+              <input type="text" id="zipCode" name="zipCode"
+                placeholder="우편번호"
+                maxlength="5"
+                readonly
+                style="background: #f0ece5; cursor: default;" />
+              <button type="button" class="zip-btn" onclick="searchZip()">🔍 우편번호 검색</button>
+            </div>
+            <input type="text" id="address1" name="address1"
+              placeholder="기본 주소"
+              readonly
+              style="background: #f0ece5; cursor: default;" />
+            <input type="text" id="address2" name="address2"
+              placeholder="상세 주소 (동, 호수 등)"
+              required />
+          </div>
+        </div>
+
+        <!-- 추천인 / 후원인 -->
+        <div class="field-row">
+          <div class="field">
+            <label>가입 경로 <span class="hint">선택 입력</span></label>
+            <input type="text" id="referrer" name="referrer"
+              placeholder="가입 경로를 입력해 주세요" />
+          </div>
+          <div class="field">
+            <label>담당자 <span class="hint">선택 입력</span></label>
+            <input type="text" id="sponsor" name="sponsor"
+              placeholder="담당자 ID 또는 이름" />
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- 주문 제품 -->
+      <div class="section-label">주문 제품</div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label>제품명 <span class="required">*</span></label>
+          <textarea id="productName" name="productName"
+            placeholder="주문하실 제품명을 입력해 주세요"
+            rows="4"
+            style="font-family: 'Noto Serif KR', serif; font-size: 14px; color: var(--ink); background: rgba(247,243,236,0.7); border: 1.5px solid var(--fog); border-radius: 8px; padding: 11px 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; width: 100%; resize: vertical; line-height: 1.7;"
+            onfocus="this.style.borderColor='var(--leaf)'; this.style.background='#fff'; this.style.boxShadow='0 0 0 3px rgba(109,155,95,0.12)';"
+            onblur="this.style.borderColor='var(--fog)'; this.style.background='rgba(247,243,236,0.7)'; this.style.boxShadow='none';"
+            required></textarea>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- 약관 동의 -->
+      <label class="agreement">
+        <input type="checkbox" id="agree" name="agree" required />
+        <span class="agreement-text">
+          <a href="#" onclick="return false;">이용약관</a> 및 
+          <a href="#" onclick="return false;">개인정보 처리방침</a>에 동의합니다. 
+          수집된 정보는 해외 직구 서비스 제공 목적으로만 사용됩니다.
+        </span>
+      </label>
+
+      <button type="submit" class="submit-btn">
+        주문 신청하기
+      </button>
+
+    </form>
+  </div>
+
+  <p class="footer-note">
+    © 2025 Value Tree · 해외 직구 전문 서비스<br>
+    문의: support@valuetree.kr
+  </p>
+</div>
+
+<!-- 다음 우편번호 서비스 -->
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+  // 전화번호 자동 하이픈
+  document.getElementById('phone').addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length <= 3) {
+      e.target.value = v;
+    } else if (v.length <= 7) {
+      e.target.value = v.slice(0,3) + '-' + v.slice(3);
+    } else {
+      e.target.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
+    }
+  });
+
+  // 통관번호 대문자 변환
+  document.getElementById('customsCode').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+  });
+
+  // 아이디 소문자 변환
+  document.getElementById('userId').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+  });
+
+  // 우편번호 검색 (다음 API)
+  function searchZip() {
+    new daum.Postcode({
+      oncomplete: function(data) {
+        document.getElementById('zipCode').value = data.zonecode;
+        document.getElementById('address1').value = data.roadAddress || data.jibunAddress;
+        document.getElementById('address2').focus();
+      }
+    }).open();
+  }
+
+  // ✅ 구글 앱스 스크립트 웹앱 URL을 여기에 붙여넣으세요
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHXZn1QAnhFjY9DSdkflyBqIiGYOwqFwAxLEJndKVTS7YJqeC__k746T0JTuPc_c7KLw/exec';
+
+  // 폼 제출
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const fields = {
+      '가입 ID': document.getElementById('userId').value.trim(),
+      '통관 번호': document.getElementById('customsCode').value.trim(),
+      '이름': document.getElementById('name').value.trim(),
+      '전화번호': document.getElementById('phone').value.trim(),
+      '우편번호': document.getElementById('zipCode').value.trim(),
+      '기본 주소': document.getElementById('address1').value.trim(),
+      '상세 주소': document.getElementById('address2').value.trim(),
+      '가입 경로': document.getElementById('referrer').value.trim(),
+      '담당자': document.getElementById('sponsor').value.trim(),
+      '제품명': document.getElementById('productName').value.trim(),
+    };
+
+    // 필수 항목 검사
+    const required = ['가입 ID','통관 번호','이름','전화번호','우편번호','기본 주소','상세 주소','제품명'];
+    for (const key of required) {
+      if (!fields[key]) {
+        alert(`[${key}]을(를) 입력해주세요.`);
+        return;
+      }
+    }
+
+    if (!document.getElementById('agree').checked) {
+      alert('이용약관 및 개인정보 처리방침에 동의해주세요.');
+      return;
+    }
+
+    // 통관번호 형식 검사 (P + 12자리 숫자)
+    if (!/^P\d{12}$/.test(fields['통관 번호'])) {
+      alert('통관 번호 형식이 올바르지 않습니다.\n예: P000000000000 (P + 숫자 12자리)');
+      return;
+    }
+
+    // URL 미설정 안내
+    if (GOOGLE_SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') {
+      alert('⚠️ 구글 스크립트 URL이 아직 설정되지 않았습니다.\nHTML 파일 내 GOOGLE_SCRIPT_URL을 설정해주세요.');
+      return;
+    }
+
+    // 버튼 로딩 상태
+    const btn = document.querySelector('.submit-btn');
+    btn.textContent = '전송 중...';
+    btn.disabled = true;
+
+    try {
+      fields['신청 일시'] = new Date().toLocaleString('ko-KR');
+
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fields),
+      });
+
+      alert(`✅ 주문 신청이 완료되었습니다!\n\n가입 ID: ${fields['가입 ID']}\n이름: ${fields['이름']}\n\n구글 스프레드시트에 자동 저장되었습니다.`);
+      e.target.reset();
+    } catch (err) {
+      alert('❌ 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      console.error(err);
+    } finally {
+      btn.textContent = '주문 신청하기';
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
