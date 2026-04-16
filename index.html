@@ -356,6 +356,101 @@
     }
     .submit-btn:active { transform: translateY(0); }
 
+    /* 성공 모달 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(44,31,15,0.45);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.show {
+      display: flex;
+      animation: fadeIn 0.25s ease;
+    }
+    .modal-box {
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(200,169,110,0.3);
+      border-radius: 20px;
+      padding: 40px 36px 32px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(59,42,26,0.18), 0 1px 0 rgba(255,255,255,0.9) inset;
+      animation: scaleUp 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .modal-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #4a6741, #6d9b5f);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(74,103,65,0.3);
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--bark);
+      margin-bottom: 10px;
+    }
+    .modal-desc {
+      font-size: 13.5px;
+      color: #7a6a58;
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+    .modal-info {
+      background: rgba(74,103,65,0.05);
+      border: 1px solid rgba(74,103,65,0.15);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .modal-info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: var(--ink);
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(74,103,65,0.08);
+    }
+    .modal-info-row:last-child { border-bottom: none; }
+    .modal-info-row span:first-child { color: #9a8872; font-weight: 600; }
+    .modal-info-row span:last-child { font-weight: 500; }
+    .modal-close-btn {
+      width: 100%;
+      padding: 13px;
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      letter-spacing: 0.06em;
+      color: #fff;
+      background: linear-gradient(135deg, var(--moss) 0%, #3a5633 100%);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(74,103,65,0.3);
+    }
+    .modal-close-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 7px 22px rgba(74,103,65,0.35);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes scaleUp {
+      from { opacity: 0; transform: scale(0.88); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
     /* Footer */
     .footer-note {
       text-align: center;
@@ -574,9 +669,45 @@
   </p>
 </div>
 
+<!-- 성공 모달 -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box">
+    <div class="modal-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+    </div>
+    <h2 class="modal-title">주문 신청 완료</h2>
+    <p class="modal-desc">신청하신 정보가 성공적으로 접수되었습니다.<br>구글 스프레드시트에 자동 저장되었습니다.</p>
+    <div class="modal-info">
+      <div class="modal-info-row">
+        <span>가입 ID</span>
+        <span id="modalUserId">—</span>
+      </div>
+      <div class="modal-info-row">
+        <span>이름</span>
+        <span id="modalName">—</span>
+      </div>
+      <div class="modal-info-row">
+        <span>신청 일시</span>
+        <span id="modalDate">—</span>
+      </div>
+    </div>
+    <button class="modal-close-btn" onclick="closeModal()">확인</button>
+  </div>
+</div>
+
 <!-- 다음 우편번호 서비스 -->
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script>
+  function closeModal() {
+    document.getElementById('successModal').classList.remove('show');
+  }
+  // 모달 바깥 클릭 시 닫기
+  document.getElementById('successModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
   // 전화번호 자동 하이픈
   document.getElementById('phone').addEventListener('input', function(e) {
     let v = e.target.value.replace(/\D/g, '');
@@ -714,8 +845,13 @@
         body: JSON.stringify(fields),
       });
 
-      alert(`✅ 주문 신청이 완료되었습니다!\n\n가입 ID: ${fields['가입 ID']}\n이름: ${fields['이름']}\n\n구글 스프레드시트에 자동 저장되었습니다.`);
+      // 성공 모달 표시
+      document.getElementById('modalUserId').textContent = fields['가입 ID'];
+      document.getElementById('modalName').textContent = fields['이름'];
+      document.getElementById('modalDate').textContent = fields['신청 일시'];
+      document.getElementById('successModal').classList.add('show');
       e.target.reset();
+      document.getElementById('enAddressSection').style.display = 'none';
     } catch (err) {
       alert('❌ 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       console.error(err);
