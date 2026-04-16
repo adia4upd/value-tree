@@ -500,17 +500,18 @@
               placeholder="상세 주소 (동, 호수 등)"
               required />
 
-            <!-- 영문 주소 자동 변환 (한국어 주소 아래 바로 표시) -->
+            <!-- 영문 주소 자동 변환 (한칸, 상세주소+기본주소 통합) -->
             <div id="enAddressSection" style="display:none; border-top:1px dashed rgba(74,103,65,0.2); padding-top:10px; margin-top:4px;">
               <div style="font-size:10.5px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">
                 🌐 영문 주소 (해외 배송용 · 자동 변환)
               </div>
-              <input type="text" id="address1En" name="address1En"
-                placeholder="English address (auto-filled)"
+              <input type="text" id="fullEnAddress" name="fullEnAddress"
+                placeholder="상세 주소 입력 시 자동 완성됩니다"
                 readonly
-                style="background: #f0ece5; cursor: default; margin-bottom:8px;" />
-              <input type="text" id="address2En" name="address2En"
-                placeholder="Detail address in English (Unit, Floor, etc.)" />
+                style="background: #f0ece5; cursor: default;" />
+              <!-- 내부 처리용 hidden 필드 -->
+              <input type="hidden" id="address1En" name="address1En" />
+              <input type="hidden" id="address2En" name="address2En" />
             </div>
           </div>
         </div>
@@ -609,6 +610,7 @@
         // 영문 주소 자동 변환 (Daum API 제공)
         const enAddr = data.roadAddressEnglish || data.jibunAddressEnglish || '';
         document.getElementById('address1En').value = enAddr;
+        document.getElementById('fullEnAddress').value = enAddr;
 
         // 영문 주소 섹션 표시
         document.getElementById('enAddressSection').style.display = 'block';
@@ -638,26 +640,14 @@
     return en;
   }
 
-  // 한국어 상세 주소 입력 시 영문 자동 변환 + 미리보기 업데이트
+  // 한국어 상세 주소 입력 시 → 영문 변환 후 통합 한칸에 표시
   document.getElementById('address2').addEventListener('input', function() {
     const base = document.getElementById('address1En').value.trim();
     if (!base) return; // 우편번호 검색 전엔 동작 안 함
-    const enDetail = translateDetailToEn(this.value);
+    const enDetail = translateDetailToEn(this.value.trim());
     document.getElementById('address2En').value = enDetail;
-    // 미리보기: 상세주소 앞, 기본주소 뒤 (국제 배송 표준)
-    document.getElementById('address2En').dispatchEvent(new Event('input'));
-  });
-
-  // 영문 상세주소 변경 시 미리보기 갱신
-  document.getElementById('address2En').addEventListener('input', function() {
-    const base = document.getElementById('address1En').value.trim();
-    const detail = this.value.trim();
-    const preview = detail ? detail + ', ' + base : base;
-    const note = document.getElementById('enAddressSection').querySelector('input[readonly]');
-    // 미리보기용 placeholder 업데이트
-    if (base) {
-      document.getElementById('address1En').setAttribute('placeholder', preview);
-    }
+    // 통합 영문 주소: 상세주소 앞 + 기본주소 뒤
+    document.getElementById('fullEnAddress').value = enDetail ? enDetail + ', ' + base : base;
   });
 
   // ✅ 구글 앱스 스크립트 웹앱 URL을 여기에 붙여넣으세요
@@ -667,10 +657,7 @@
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const enBase = document.getElementById('address1En').value.trim();
-    const enDetail = document.getElementById('address2En').value.trim();
-    // 국제 배송 표준: 상세주소(Unit/Apt) → 기본주소 순서
-    const fullEnAddress = enDetail ? enDetail + ', ' + enBase : enBase;
+    const fullEnAddress = document.getElementById('fullEnAddress').value.trim();
 
     const fields = {
       '가입 ID': document.getElementById('userId').value.trim(),
