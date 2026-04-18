@@ -759,7 +759,7 @@
             <input type="checkbox" class="product-check" onchange="toggleQty(this)">
             <span class="product-name-text">① Alpha GPC <span style="color:var(--stone);font-size:13px;">(알파지피씨)</span></span>
           </label>
-          <div class="product-qty-wrap" style="display:none;">
+          <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="1" min="1" max="10" readonly>
             <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
@@ -771,7 +771,7 @@
             <input type="checkbox" class="product-check" onchange="toggleQty(this)">
             <span class="product-name-text">② NMN <span style="color:var(--stone);font-size:13px;">(엔엠엔)</span></span>
           </label>
-          <div class="product-qty-wrap" style="display:none;">
+          <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="1" min="1" max="10" readonly>
             <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
@@ -783,7 +783,7 @@
             <input type="checkbox" class="product-check" onchange="toggleQty(this)">
             <span class="product-name-text">③ SUPER PROST AID <span style="color:var(--stone);font-size:13px;">(전립선)</span></span>
           </label>
-          <div class="product-qty-wrap" style="display:none;">
+          <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="1" min="1" max="10" readonly>
             <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
@@ -795,7 +795,7 @@
             <input type="checkbox" class="product-check" onchange="toggleQty(this)">
             <span class="product-name-text">④ JOINT CARE <span style="color:var(--stone);font-size:13px;">(관절)</span></span>
           </label>
-          <div class="product-qty-wrap" style="display:none;">
+          <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="1" min="1" max="10" readonly>
             <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
@@ -807,7 +807,7 @@
             <input type="checkbox" class="product-check" onchange="toggleQty(this)">
             <span class="product-name-text">⑤ GLUCOLYSE <span style="color:var(--stone);font-size:13px;">(당뇨)</span></span>
           </label>
-          <div class="product-qty-wrap" style="display:none;">
+          <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="1" min="1" max="10" readonly>
             <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
@@ -819,7 +819,7 @@
             <input type="checkbox" class="product-check" onchange="toggleQty(this)">
             <span class="product-name-text">⑥ 뉴본에이드 <span style="color:var(--stone);font-size:13px;">(혈관)</span></span>
           </label>
-          <div class="product-qty-wrap" style="display:none;">
+          <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="1" min="1" max="10" readonly>
             <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
@@ -952,12 +952,9 @@
   // ── 제품 선택 함수 ──
   function toggleQty(checkbox) {
     const row = checkbox.closest('.product-row');
-    const qtyWrap = row.querySelector('.product-qty-wrap');
     if (checkbox.checked) {
-      qtyWrap.style.display = 'flex';
       row.classList.add('selected');
     } else {
-      qtyWrap.style.display = 'none';
       row.classList.remove('selected');
       row.querySelector('.qty-input').value = 1;
     }
