@@ -784,6 +784,18 @@
             <span style="font-size:13px; color:var(--stone); margin-left:4px;">개</span>
           </div>
         </div>
+        <div class="product-row" data-product="뉴본에이드 (혈관)">
+          <label class="product-check-label">
+            <input type="checkbox" class="product-check" onchange="toggleQty(this)">
+            <span class="product-name-text">⑥ 뉴본에이드 <span style="color:var(--stone);font-size:13px;">(혈관)</span></span>
+          </label>
+          <div class="product-qty-wrap" style="display:none;">
+            <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
+            <input type="number" class="qty-input" value="1" min="1" max="99" readonly>
+            <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
+            <span style="font-size:13px; color:var(--stone); margin-left:4px;">개</span>
+          </div>
+        </div>
       </div>
 
       <!-- 선택 요약 -->
@@ -1094,6 +1106,7 @@
       'SUPER PROST AID 수량': getProductQty('SUPER PROST AID (전립선)'),
       'JOINT CARE 수량': getProductQty('JOINT CARE (관절)'),
       'GLUCOLYSE 수량': getProductQty('GLUCOLYSE (당뇨)'),
+      '뉴본에이드 수량': getProductQty('뉴본에이드 (혈관)'),
     };
 
     // 필수 항목 검사
