@@ -750,15 +750,12 @@
 
       <!-- 주문 제품 -->
       <div class="section-label">주문 제품 <span class="required">*</span></div>
-      <p style="font-size:13px; color:var(--stone); margin-bottom:14px;">주문하실 제품을 선택하고 수량을 입력해 주세요. (최소 1개 이상 선택 필수)</p>
+      <p style="font-size:13px; color:var(--stone); margin-bottom:14px;">원하시는 제품의 수량을 선택해 주세요. (최소 1개 이상 필수)</p>
 
       <div id="productList" style="display:flex; flex-direction:column; gap:10px; margin-bottom:6px;">
         <!-- 제품 행 -->
         <div class="product-row" data-product="Alpha GPC (알파지피씨)">
-          <label class="product-check-label">
-            <input type="checkbox" class="product-check" onchange="toggleQty(this)">
-            <span class="product-name-text">① Alpha GPC <span style="color:var(--stone);font-size:13px;">(알파지피씨)</span></span>
-          </label>
+          <span class="product-name-text">① Alpha GPC <span style="color:var(--stone);font-size:13px;">(알파지피씨)</span></span>
           <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="0" min="0" max="10" readonly>
@@ -767,10 +764,7 @@
           </div>
         </div>
         <div class="product-row" data-product="NMN (엔엠엔)">
-          <label class="product-check-label">
-            <input type="checkbox" class="product-check" onchange="toggleQty(this)">
-            <span class="product-name-text">② NMN <span style="color:var(--stone);font-size:13px;">(엔엠엔)</span></span>
-          </label>
+          <span class="product-name-text">② NMN <span style="color:var(--stone);font-size:13px;">(엔엠엔)</span></span>
           <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="0" min="0" max="10" readonly>
@@ -779,10 +773,7 @@
           </div>
         </div>
         <div class="product-row" data-product="SUPER PROST AID (전립선)">
-          <label class="product-check-label">
-            <input type="checkbox" class="product-check" onchange="toggleQty(this)">
-            <span class="product-name-text">③ SUPER PROST AID <span style="color:var(--stone);font-size:13px;">(전립선)</span></span>
-          </label>
+          <span class="product-name-text">③ SUPER PROST AID <span style="color:var(--stone);font-size:13px;">(전립선)</span></span>
           <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="0" min="0" max="10" readonly>
@@ -791,10 +782,7 @@
           </div>
         </div>
         <div class="product-row" data-product="JOINT CARE (관절)">
-          <label class="product-check-label">
-            <input type="checkbox" class="product-check" onchange="toggleQty(this)">
-            <span class="product-name-text">④ JOINT CARE <span style="color:var(--stone);font-size:13px;">(관절)</span></span>
-          </label>
+          <span class="product-name-text">④ JOINT CARE <span style="color:var(--stone);font-size:13px;">(관절)</span></span>
           <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="0" min="0" max="10" readonly>
@@ -803,10 +791,7 @@
           </div>
         </div>
         <div class="product-row" data-product="GLUCOLYSE (당뇨)">
-          <label class="product-check-label">
-            <input type="checkbox" class="product-check" onchange="toggleQty(this)">
-            <span class="product-name-text">⑤ GLUCOLYSE <span style="color:var(--stone);font-size:13px;">(당뇨)</span></span>
-          </label>
+          <span class="product-name-text">⑤ GLUCOLYSE <span style="color:var(--stone);font-size:13px;">(당뇨)</span></span>
           <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="0" min="0" max="10" readonly>
@@ -815,10 +800,7 @@
           </div>
         </div>
         <div class="product-row" data-product="퍼플 (혈관염증)">
-          <label class="product-check-label">
-            <input type="checkbox" class="product-check" onchange="toggleQty(this)">
-            <span class="product-name-text">⑥ 퍼플 <span style="color:var(--stone);font-size:13px;">(혈관염증)</span></span>
-          </label>
+          <span class="product-name-text">⑥ 퍼플 <span style="color:var(--stone);font-size:13px;">(혈관염증)</span></span>
           <div class="product-qty-wrap" style="display:flex;">
             <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
             <input type="number" class="qty-input" value="0" min="0" max="10" readonly>
@@ -949,22 +931,16 @@
     if (e.target === this) closeModal();
   });
 
-  // ── 제품 선택 함수 ──
-  function toggleQty(checkbox) {
-    const row = checkbox.closest('.product-row');
-    if (checkbox.checked) {
-      row.classList.add('selected');
-    } else {
-      row.classList.remove('selected');
-      row.querySelector('.qty-input').value = 1;
-    }
-    updateProductSummary();
-  }
-
+  // ── 제품 수량 함수 ──
   function changeQty(btn, delta) {
     const input = btn.parentElement.querySelector('.qty-input');
     const val = parseInt(input.value) + delta;
-    if (val >= 1 && val <= 10) { input.value = val; }
+    if (val >= 0 && val <= 10) {
+      input.value = val;
+      const row = btn.closest('.product-row');
+      if (val > 0) row.classList.add('selected');
+      else row.classList.remove('selected');
+    }
     updateProductSummary();
   }
 
@@ -972,10 +948,9 @@
     const rows = document.querySelectorAll('.product-row');
     const selected = [];
     rows.forEach(row => {
-      const cb = row.querySelector('.product-check');
-      if (cb.checked) {
+      const qty = parseInt(row.querySelector('.qty-input').value);
+      if (qty > 0) {
         const name = row.getAttribute('data-product');
-        const qty = row.querySelector('.qty-input').value;
         selected.push(`${name} × ${qty}개`);
       }
     });
@@ -992,10 +967,9 @@
     const rows = document.querySelectorAll('.product-row');
     const selected = [];
     rows.forEach(row => {
-      const cb = row.querySelector('.product-check');
-      if (cb.checked) {
+      const qty = parseInt(row.querySelector('.qty-input').value);
+      if (qty > 0) {
         const name = row.getAttribute('data-product');
-        const qty = row.querySelector('.qty-input').value;
         selected.push(`${name} × ${qty}개`);
       }
     });
@@ -1006,9 +980,8 @@
     const rows = document.querySelectorAll('.product-row');
     for (const row of rows) {
       if (row.getAttribute('data-product') === productName) {
-        const cb = row.querySelector('.product-check');
-        if (cb.checked) return row.querySelector('.qty-input').value + '개';
-        return '-';
+        const qty = parseInt(row.querySelector('.qty-input').value);
+        return qty > 0 ? qty + '개' : '-';
       }
     }
     return '-';
@@ -1145,7 +1118,7 @@
       }
     }
     if (!fields['제품명']) {
-      alert('주문할 제품을 최소 1개 이상 선택해주세요.');
+      alert('주문할 제품의 수량을 최소 1개 이상 선택해주세요.');
       return;
     }
 
