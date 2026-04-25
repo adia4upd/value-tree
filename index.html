@@ -963,19 +963,6 @@
     }
   }
 
-  function getSelectedProducts() {
-    const rows = document.querySelectorAll('.product-row');
-    const selected = [];
-    rows.forEach(row => {
-      const qty = parseInt(row.querySelector('.qty-input').value);
-      if (qty > 0) {
-        const name = row.getAttribute('data-product');
-        selected.push(`${name} × ${qty}개`);
-      }
-    });
-    return selected.join(', ');
-  }
-
   function getProductQty(productName) {
     const rows = document.querySelectorAll('.product-row');
     for (const row of rows) {
@@ -1100,7 +1087,6 @@
       '영문 주소': fullEnAddress,
       '추천인 이름': document.getElementById('referrer').value.trim(),
       '추천인(아이디)': document.getElementById('sponsor').value.trim(),
-      '제품명': getSelectedProducts(),
       'Alpha GPC 수량': getProductQty('Alpha GPC (알파지피씨)'),
       'NMN 수량': getProductQty('NMN (엔엠엔)'),
       'SUPER PROST AID 수량': getProductQty('SUPER PROST AID (전립선)'),
@@ -1117,7 +1103,8 @@
         return;
       }
     }
-    if (!fields['제품명']) {
+    const qtyKeys = ['Alpha GPC 수량','NMN 수량','SUPER PROST AID 수량','JOINT CARE 수량','GLUCOLYSE 수량','퍼플 수량'];
+    if (!qtyKeys.some(k => fields[k] && fields[k] !== '-')) {
       alert('주문할 제품의 수량을 최소 1개 이상 선택해주세요.');
       return;
     }
