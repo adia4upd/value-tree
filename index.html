@@ -752,6 +752,12 @@
       <div class="section-label">주문 제품 <span class="required">*</span></div>
       <p style="font-size:13px; color:var(--stone); margin-bottom:14px;">원하시는 제품의 수량을 선택해 주세요. (최소 1개 이상 필수)</p>
 
+      <!-- 나중에 선택 토글 -->
+      <label id="laterLabel" style="display:flex; align-items:center; gap:10px; padding:12px 16px; margin-bottom:14px; border:1.5px solid var(--border,#ddd); border-radius:10px; cursor:pointer; background:#fafaf8;">
+        <input type="checkbox" id="selectLater" onchange="toggleSelectLater(this)" style="width:18px; height:18px; accent-color:var(--leaf); cursor:pointer; flex-shrink:0;">
+        <span style="font-size:14px; color:var(--stone,#888);">나중에 선택 — 제품을 아직 결정하지 못했어요</span>
+      </label>
+
       <div id="productList" style="display:flex; flex-direction:column; gap:10px; margin-bottom:6px;">
         <!-- 제품 행 -->
         <div class="product-row" data-product="Alpha GPC (알파지피씨)">
@@ -931,6 +937,20 @@
     if (e.target === this) closeModal();
   });
 
+  // ── 나중에 선택 토글 ──
+  function toggleSelectLater(cb) {
+    const list = document.getElementById('productList');
+    const summary = document.getElementById('productSummary');
+    if (cb.checked) {
+      list.style.opacity = '0.35';
+      list.style.pointerEvents = 'none';
+      summary.style.display = 'none';
+    } else {
+      list.style.opacity = '1';
+      list.style.pointerEvents = '';
+    }
+  }
+
   // ── 제품 수량 함수 ──
   function changeQty(btn, delta) {
     const input = btn.parentElement.querySelector('.qty-input');
@@ -1103,8 +1123,10 @@
         return;
       }
     }
+    const isLater = document.getElementById('selectLater').checked;
+    fields['제품 선택'] = isLater ? '나중에 선택' : '즉시 선택';
     const qtyKeys = ['Alpha GPC 수량','NMN 수량','SUPER PROST AID 수량','JOINT CARE 수량','GLUCOLYSE 수량','퍼플 수량'];
-    if (!qtyKeys.some(k => fields[k] && fields[k] !== '-')) {
+    if (!isLater && !qtyKeys.some(k => fields[k] && fields[k] !== '-')) {
       alert('주문할 제품의 수량을 최소 1개 이상 선택해주세요.');
       return;
     }
