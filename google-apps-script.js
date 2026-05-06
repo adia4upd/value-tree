@@ -1,15 +1,3 @@
-/**
- * Value Tree — 회원 주문 신청서 Google Apps Script
- *
- * 사용법:
- * 1. Google Sheets 열기 → 확장 프로그램 → Apps Script
- * 2. 이 코드 전체 붙여넣기
- * 3. 저장 후 [배포] → [새 배포] → 유형: 웹앱
- *    - 액세스: 모든 사용자
- *    - 실행: 나 (본인 계정)
- * 4. 배포 URL을 index.html의 GOOGLE_SCRIPT_URL에 붙여넣기
- */
-
 // ✅ 컬럼 순서 고정 (이 순서대로 엑셀에 들어감)
 const COLUMNS = [
   '신청 일시',
@@ -36,13 +24,15 @@ function doPost(e) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('신청서');
   const data = JSON.parse(e.postData.contents);
 
-  // 헤더가 없으면 첫 행 자동 생성 (COLUMNS 순서 고정)
+  // 1행 헤더 항상 최신 COLUMNS로 강제 업데이트
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(COLUMNS);
+  } else {
+    sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
   }
 
   // COLUMNS 순서대로 값 추출 (없는 키는 빈칸)
-  const row = COLUMNS.map(col => data[col] !== undefined ? data[col] : '');
+  const row = COLUMNS.map(col => (data[col] !== undefined && data[col] !== null) ? data[col] : '');
   sheet.appendRow(row);
 
   return ContentService.createTextOutput('success');
