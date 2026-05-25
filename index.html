@@ -867,7 +867,31 @@
         <span id="modalDate">—</span>
       </div>
     </div>
+    <button class="modal-dl-btn" onclick="downloadReceipt()">📥 주문서 이미지 저장</button>
     <button class="modal-close-btn" onclick="closeModal()">확인</button>
+  </div>
+</div>
+
+<!-- 이미지 생성용 숨김 카드 -->
+<div id="receipt-card">
+  <div class="rc-header">
+    <div class="rc-logo">🌳 Value Tree</div>
+    <div class="rc-badge">주문 신청 확인증</div>
+  </div>
+  <div class="rc-divider"></div>
+  <div class="rc-rows">
+    <div class="rc-row"><span class="rc-label">가입 ID</span><span class="rc-val" id="rc-userId"></span></div>
+    <div class="rc-row"><span class="rc-label">이름</span><span class="rc-val" id="rc-name"></span></div>
+    <div class="rc-row"><span class="rc-label">전화번호</span><span class="rc-val" id="rc-phone"></span></div>
+    <div class="rc-row"><span class="rc-label">주소</span><span class="rc-val" id="rc-address"></span></div>
+    <div class="rc-row"><span class="rc-label">통관번호</span><span class="rc-val" id="rc-customs"></span></div>
+  </div>
+  <div class="rc-divider"></div>
+  <div class="rc-products" id="rc-products"></div>
+  <div class="rc-divider"></div>
+  <div class="rc-footer">
+    <div class="rc-date" id="rc-date"></div>
+    <div class="rc-note">해외 직구 대행 서비스 · valuetree-mall.com</div>
   </div>
 </div>
 
@@ -928,8 +952,71 @@
   </div>
 </div>
 
+<style>
+/* 다운로드 버튼 */
+.modal-dl-btn {
+  display: block; width: 100%;
+  padding: 12px; margin-bottom: 10px;
+  background: #3a6b35; color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  transition: background 0.2s;
+}
+.modal-dl-btn:hover { background: #2e5429; }
+
+/* 이미지 생성용 카드 (화면 밖에 숨김) */
+#receipt-card {
+  position: fixed; left: -9999px; top: 0;
+  width: 480px; padding: 36px 32px;
+  background: #fdfaf5;
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  color: #2a2a2a;
+  border: 1.5px solid #c8b99a;
+  border-radius: 16px;
+}
+.rc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.rc-logo { font-size: 1.25rem; font-weight: 900; color: #3a6b35; letter-spacing: -0.5px; }
+.rc-badge {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
+  color: #7a5c2e; background: #f5ead8;
+  padding: 4px 12px; border-radius: 20px; border: 1px solid #c8b99a;
+}
+.rc-divider { height: 1px; background: #ddd0bb; margin: 16px 0; }
+.rc-rows { display: flex; flex-direction: column; gap: 10px; }
+.rc-row { display: flex; justify-content: space-between; align-items: flex-start; font-size: 0.85rem; }
+.rc-label { color: #888; font-weight: 500; min-width: 72px; }
+.rc-val { color: #1a1a1a; font-weight: 700; text-align: right; max-width: 280px; word-break: break-all; }
+.rc-products { display: flex; flex-direction: column; gap: 8px; }
+.rc-product-row { display: flex; justify-content: space-between; font-size: 0.84rem; }
+.rc-product-name { color: #444; }
+.rc-product-qty { font-weight: 700; color: #3a6b35; }
+.rc-footer { text-align: center; }
+.rc-date { font-size: 0.78rem; color: #888; margin-bottom: 4px; }
+.rc-note { font-size: 0.72rem; color: #aaa; }
+</style>
+
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
+  async function downloadReceipt() {
+    const card = document.getElementById('receipt-card');
+    // 잠깐 화면 안으로 이동 (html2canvas 렌더링용)
+    card.style.left = '-9999px';
+    card.style.top = '0px';
+    try {
+      const canvas = await html2canvas(card, {
+        scale: 2, useCORS: true, backgroundColor: '#fdfaf5',
+        width: 480, windowWidth: 480,
+      });
+      const link = document.createElement('a');
+      link.download = `ValueTree_주문확인_${document.getElementById('rc-userId').textContent}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch(e) {
+      alert('이미지 저장 중 오류가 발생했습니다.');
+    }
+  }
+
   function closeModal() {
     document.getElementById('successModal').classList.remove('show');
   }
@@ -1168,6 +1255,36 @@
       document.getElementById('modalName').textContent = fields['이름'];
       document.getElementById('modalDate').textContent = fields['신청 일시'];
       document.getElementById('successModal').classList.add('show');
+
+      // 이미지 카드 데이터 채우기
+      document.getElementById('rc-userId').textContent = fields['가입 ID'];
+      document.getElementById('rc-name').textContent = fields['이름'];
+      document.getElementById('rc-phone').textContent = fields['전화번호'];
+      document.getElementById('rc-address').textContent = (fields['기본 주소'] + ' ' + fields['상세 주소']).trim();
+      document.getElementById('rc-customs').textContent = fields['통관 번호'] || '미입력';
+      document.getElementById('rc-date').textContent = '신청 일시: ' + fields['신청 일시'];
+
+      // 제품 목록
+      const qtyMap = {
+        'Alpha GPC': fields['Alpha GPC 수량'],
+        'NMN 10000': fields['NMN 수량'],
+        'SUPER PROST AID': fields['SUPER PROST AID 수량'],
+        'JOINT CARE': fields['JOINT CARE 수량'],
+        'GLUCOLYSE': fields['GLUCOLYSE 수량'],
+        '퍼플': fields['퍼플 수량'],
+      };
+      const prodEl = document.getElementById('rc-products');
+      prodEl.innerHTML = '';
+      let hasProduct = false;
+      Object.entries(qtyMap).forEach(([name, qty]) => {
+        if (qty && qty !== '-') {
+          hasProduct = true;
+          prodEl.innerHTML += `<div class="rc-product-row"><span class="rc-product-name">${name}</span><span class="rc-product-qty">${qty}개</span></div>`;
+        }
+      });
+      if (!hasProduct) {
+        prodEl.innerHTML = '<div class="rc-product-row"><span class="rc-product-name">나중에 선택</span><span class="rc-product-qty">—</span></div>';
+      }
       e.target.reset();
       document.getElementById('enAddressSection').style.display = 'none';
     } catch (err) {
