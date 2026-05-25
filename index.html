@@ -885,6 +885,8 @@
     <div class="rc-row"><span class="rc-label">전화번호</span><span class="rc-val" id="rc-phone"></span></div>
     <div class="rc-row"><span class="rc-label">주소</span><span class="rc-val" id="rc-address"></span></div>
     <div class="rc-row"><span class="rc-label">통관번호</span><span class="rc-val" id="rc-customs"></span></div>
+    <div class="rc-row"><span class="rc-label">소개자 ID</span><span class="rc-val" id="rc-referrer"></span></div>
+    <div class="rc-row"><span class="rc-label">담당자 ID</span><span class="rc-val" id="rc-sponsor"></span></div>
   </div>
   <div class="rc-divider"></div>
   <div class="rc-products" id="rc-products"></div>
@@ -1262,6 +1264,8 @@
       document.getElementById('rc-phone').textContent = fields['전화번호'];
       document.getElementById('rc-address').textContent = (fields['기본 주소'] + ' ' + fields['상세 주소']).trim();
       document.getElementById('rc-customs').textContent = fields['통관 번호'] || '미입력';
+      document.getElementById('rc-referrer').textContent = fields['소개자 아이디'] || '미입력';
+      document.getElementById('rc-sponsor').textContent = fields['담당자 지정 아이디'] || '미입력';
       document.getElementById('rc-date').textContent = '신청 일시: ' + fields['신청 일시'];
 
       // 제품 목록
