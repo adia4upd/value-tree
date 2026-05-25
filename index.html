@@ -875,7 +875,26 @@
 <!-- 이미지 생성용 숨김 카드 -->
 <div id="receipt-card">
   <div class="rc-header">
-    <div class="rc-logo">🌳 Value Tree</div>
+    <div class="rc-logo">
+      <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="rcBg" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#1e1b3a"/>
+            <stop offset="100%" stop-color="#0f0e1f"/>
+          </linearGradient>
+          <linearGradient id="rcBolt" x1="14" y1="6" x2="30" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#b18cff"/>
+            <stop offset="50%" stop-color="#7c4dff"/>
+            <stop offset="100%" stop-color="#5c2de0"/>
+          </linearGradient>
+        </defs>
+        <!-- 다크 배경 -->
+        <rect width="44" height="44" rx="11" fill="url(#rcBg)"/>
+        <!-- 퍼플 번개 -->
+        <path d="M26 6L13 25H22L18 38L31 19H22L26 6Z" fill="url(#rcBolt)"/>
+      </svg>
+      <span class="rc-logo-text">Value Tree</span>
+    </div>
     <div class="rc-badge">주문 신청 확인증</div>
   </div>
   <div class="rc-divider"></div>
@@ -977,7 +996,8 @@
   border-radius: 16px;
 }
 .rc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.rc-logo { font-size: 1.25rem; font-weight: 900; color: #3a6b35; letter-spacing: -0.5px; }
+.rc-logo { display: flex; align-items: center; gap: 10px; }
+.rc-logo-text { font-size: 1.2rem; font-weight: 900; color: #1a1a2e; letter-spacing: 1px; }
 .rc-badge {
   font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
   color: #7a5c2e; background: #f5ead8;
